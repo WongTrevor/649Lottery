@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Realistic Canada Lotto 6/49 Simulator with up to 10 draws">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto 6/49 Simulator</title>
+    <style>
+        /****************************************************************
+         * GLOBAL RESETS & THEMES
+         ****************************************************************/
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Arial", sans-serif;
+        }
+        /* Primary Theme Colors */
+        
+         :root {
+            --blue-dark: #002D72;
+            /* Deep Lotto Blue */
+            --blue-light: #1A61C6;
+            /* Hover Blue */
+            --accent-red: #D32F2F;
+            /* Red for selected numbers */
+            --bonus-red: #C62828;
+            /* Slightly darker red for bonus ball */
+            --white: #fff;
+            --text-dark: #333;
+            --background-gradient-start: #F5F9FF;
+            --background-gradient-end: #BED1F2;
+        }
+        
+        body {
+            background: linear-gradient(to bottom right, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+        
+        main {
+            flex: 1;
+            width: 90%;
+            max-width: 950px;
+            margin: 2rem auto;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1rem 2rem 2rem;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        /****************************************************************
+         * HEADER & FOOTER
+         ****************************************************************/
+        
+        header {
+            text-align: center;
+            background: var(--blue-dark);
+            color: var(--white);
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+        
+        footer {
+            text-align: center;
+            background: var(--blue-dark);
+            color: var(--white);
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+        /****************************************************************
+         * SECTIONS & HEADINGS
+         ****************************************************************/
+        
+        .section {
+            border-bottom: 1px solid #ddd;
+            padding: 1rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .section h2 {
+            text-align: center;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: var(--blue-dark);
+        }
+        
+        .step-description {
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        /****************************************************************
+         * NUMBER GRID (1-49)
+         ****************************************************************/
+        
+        #number-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin: 1rem 0;
+        }
+        
+        .grid-button {
+            background: #E3F2FD;
+            border: 2px solid transparent;
+            color: var(--text-dark);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.7rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 3px #b3b3b3;
+            position: relative;
+        }
+        /* Hover with slight 3D lift */
+        
+        .grid-button:hover:not([disabled]) {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px #aaa;
+            background: #BBDEFB;
+        }
+        /* Press */
+        
+        .grid-button:active:not([disabled]) {
+            transform: translateY(3px) scale(0.97);
+            box-shadow: 0 0 #bbb;
+        }
+        /* Selected -> red */
+        
+        .grid-button.selected {
+            background: var(--accent-red);
+            color: var(--white);
+            border: 2px solid #B71C1C;
+            box-shadow: 0 3px #961919;
+        }
+        /* Additional Indicator for Selected State */
+        
+        .grid-button.selected::after {
+            content: '✔';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--accent-red);
+        }
+        /****************************************************************
+         * CONTROLS & BUTTONS
+         ****************************************************************/
+        
+        .controls {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .controls button,
+        .controls input[type="checkbox"] {
+            cursor: pointer;
+        }
+        
+        .controls button {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            background: var(--blue-dark);
+            color: var(--white);
+            font-size: 1rem;
+            font-weight: bold;
+            box-shadow: 0 3px #001a47;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        
+        .controls button:hover:not([disabled]) {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 5px #000f2e;
+            background-color: var(--blue-light);
+        }
+        
+        .controls button:active:not([disabled]) {
+            transform: translateY(3px) scale(0.96);
+            box-shadow: 0 0 #000f2e;
+        }
+        
+        .controls button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .controls .clear-btn {
+            background: #757575;
+            box-shadow: 0 3px #5f5f5f;
+        }
+        
+        .controls .clear-btn:hover:not([disabled]) {
+            background: #616161;
+        }
+        /****************************************************************
+         * DRAWS BUTTONS (1 to 10)
+         ****************************************************************/
+        
+        #draws-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .draw-choice-btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            background: #e0e0e0;
+            color: var(--blue-dark);
+            box-shadow: 0 3px #bebebe;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            flex: 1 1 40px;
+            text-align: center;
+        }
+        
+        .draw-choice-btn:hover:not([disabled]) {
+            transform: translateY(-2px) scale(1.04);
+            background: #d6d6d6;
+        }
+        
+        .draw-choice-btn:active:not([disabled]) {
+            transform: translateY(3px) scale(0.96);
+            box-shadow: 0 0 #bababa;
+        }
+        
+        .draw-choice-btn.selected {
+            background: var(--blue-dark);
+            color: var(--white);
+            box-shadow: 0 3px #001a47;
+        }
+        
+        .draw-choice-btn:focus {
+            outline: 3px solid var(--blue-light);
+        }
+        /****************************************************************
+         * TICKET INFO & COST
+         ****************************************************************/
+        
+        #ticket-summary {
+            margin-top: 1rem;
+            background: #FAFAFA;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            border: 1px solid #ddd;
+        }
+        
+        #ticket-summary p {
+            margin-bottom: 0.5rem;
+        }
+        /****************************************************************
+         * DRAW RESULTS
+         ****************************************************************/
+        
+        #draw-results {
+            margin-top: 1rem;
+            background: #FAFAFA;
+            padding: 1rem;
+            border-radius: 6px;
+            display: none;
+            /* hidden until user runs the draw */
+            border: 1px solid #ddd;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+        }
+        
+        #draw-results.show {
+            opacity: 1;
+        }
+        
+        #draw-results h3 {
+            text-align: center;
+            color: var(--blue-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .result-line {
+            margin: 0.5rem 0;
+        }
+        /* Container for winning numbers */
+        
+        .winning-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        /* Ball style with bounce animation */
+        
+        .winning-number {
+            background: var(--blue-dark);
+            color: var(--white);
+            border-radius: 50%;
+            width: 2.2rem;
+            height: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            margin: 0.3rem;
+            transform: translateY(-60px) scale(0);
+            animation: bounceIn 0.65s forwards cubic-bezier(0.22, 1.42, 0.36, 1);
+        }
+        
+        .bonus-number {
+            background: var(--bonus-red);
+        }
+        /****************************************************************
+         * KEYFRAME ANIMATIONS
+         ****************************************************************/
+        
+        @keyframes bounceIn {
+            0% {
+                transform: translateY(-60px) scale(0);
+                opacity: 0;
+            }
+            60% {
+                transform: translateY(10px) scale(1.2);
+                opacity: 1;
+            }
+            80% {
+                transform: translateY(-5px) scale(0.95);
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        /****************************************************************
+         * RESPONSIVE
+         ****************************************************************/
+        
+        @media (max-width: 768px) {
+            #number-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .controls button {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #number-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .draw-choice-btn {
+                flex: 1 1 30%;
+            }
+        }
+        /* Focus styles for accessibility */
+        
+        .grid-button:focus {
+            outline: 3px solid var(--blue-light);
+        }
+        /* Hidden class for managing visibility */
+        
+        .hidden {
+            display: none;
+        }
+        
+        .visible {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Canada Lotto 6/49 Simulator</h1>
+        <p>Up to 10 Draws, Correct Cost Calculation &amp; 3D Buttons</p>
+    </header>
+
+    <main>
+        <!-- STEP 1: Pick 6 Numbers -->
+        <section class="section">
+            <h2>1. Choose Your 6 Numbers</h2>
+            <p class="step-description">
+                Select <strong>exactly 6 distinct numbers</strong> from 1 to 49. Chosen numbers turn <span style="color: var(--accent-red)">red</span> with a checkmark. Or use <em>Quick Pick</em> to auto-select 6 random numbers for you.
+            </p>
+            <div id="number-grid" role="grid" aria-label="Number selection grid">
+                <!-- Number buttons will be generated by JavaScript -->
+            </div>
+
+            <div class="controls">
+                <button id="quick-pick-btn">Quick Pick</button>
+                <button class="clear-btn" id="clear-btn">Clear Selection</button>
+                <span id="selected-count" style="margin-left:auto; font-weight:bold;">Selected: 0/6</span>
+            </div>
+            <p id="selected-numbers" style="margin-top:0.5rem; font-size:0.9rem;"></p>
+        </section>
+
+        <!-- STEP 2: Encore (Optional) -->
+        <section class="section">
+            <h2>2. Encore (Optional)</h2>
+            <p class="step-description">
+                Encore is <strong>$1</strong> extra per draw. Match all 7 Encore digits (left to right) for a chance at up to $1,000,000.
+            </p>
+            <div class="controls">
+                <label>
+                    <input type="checkbox" id="encore-checkbox" aria-label="Add Encore option">
+                    <span style="margin-left:0.5rem;">Add Encore ($1)</span>
+                </label>
+            </div>
+        </section>
+
+        <!-- STEP 3: Number of Draws (1-10 with separate buttons) -->
+        <section class="section">
+            <h2>3. Number of Draws</h2>
+            <p class="step-description">
+                Click a button below to set how many consecutive draws you want (from <strong>1</strong> to <strong>10</strong>).
+            </p>
+            <div id="draws-buttons-container" class="controls" role="group" aria-label="Number of draws selection">
+                <!-- Draw buttons will be generated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- STEP 4: Purchase Ticket -->
+        <section class="section">
+            <h2>4. Purchase Your Ticket</h2>
+            <p class="step-description">
+                Each Lotto 6/49 play costs <strong>$3</strong>. Encore (if selected) costs
+                <strong>$1</strong> more per draw. The total is multiplied by the number of draws.
+            </p>
+            <div class="controls">
+                <button id="buy-ticket-btn">Buy Ticket</button>
+                <span id="total-cost" style="margin-left:auto; font-weight:bold;">Total Cost: $0</span>
+            </div>
+            <div id="ticket-summary"></div>
+        </section>
+
+        <!-- STEP 5: Simulate Draw -->
+        <section class="section">
+            <h2>5. Simulate Draw</h2>
+            <p class="step-description">
+                After you buy your ticket, run the draw to see the winning numbers and check your match results!
+            </p>
+            <div class="controls">
+                <button id="run-draw-btn" disabled>Run Draw &amp; Check Winnings</button>
+            </div>
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="hidden">
+                <p>Simulating draw...</p>
+                <!-- Add a CSS spinner here if desired -->
+            </div>
+            <!-- RESULTS -->
+            <div id="draw-results" class="hidden">
+                <h3>Official Draw Results</h3>
+                <div>
+                    <p><strong>Main Winning Numbers (6 + Bonus):</strong></p>
+                    <div class="winning-numbers" id="winning-numbers"></div>
+                </div>
+                <div class="result-line">
+                    <strong>Guaranteed Draw Winner #:</strong>
+                    <span id="winning-guaranteed" style="margin-left:0.5rem; font-weight:bold;"></span>
+                </div>
+                <div class="result-line">
+                    <strong>Encore Winner #:</strong>
+                    <span id="winning-encore" style="margin-left:0.5rem; font-weight:bold;"></span>
+                </div>
+                <hr style="margin:1rem 0;">
+                <h3>Your Match Results</h3>
+                <div id="match-summary" class="result-line"></div>
+                <div id="guaranteed-match" class="result-line"></div>
+                <div id="encore-match" class="result-line"></div>
+
+                <div style="margin-top:1rem; text-align:center;">
+                    <button id="play-again-btn">Play Again</button>
+                </div>
+                <p style="margin-top:1rem; font-size:0.9rem; text-align:center;">
+                    <em>Demo only. Actual draws, odds, and prizes vary.</em>
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Canada Lotto 6/49 Simulator. Unofficial demonstration.</p>
+        <p style="font-size:0.8rem; color:#ccc;">
+            <em>Note: This simulator is for entertainment purposes only. Actual lottery draws, odds, and prizes may vary.</em>
+        </p>
+    </footer>
+
+    <script>
+        /**************************************************************
+         * CONSTANTS
+         **************************************************************/
+        const MAX_SELECTION = 6;
+        const MIN_NUMBER = 1;
+        const MAX_NUMBER = 49;
+        const COST_PER_DRAW = 3;
+        const COST_PER_ENCORE = 1;
+        const MAX_DRAWS = 10;
+
+        /**************************************************************
+         * UTILITY FUNCTIONS
+         **************************************************************/
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Generate N unique random numbers in [min, max]
+        function generateRandomNumbers(count, min = MIN_NUMBER, max = MAX_NUMBER, exclude = []) {
+            const set = new Set();
+            while (set.size < count) {
+                const num = randomInt(min, max);
+                if (!exclude.includes(num)) set.add(num);
+            }
+            return Array.from(set).sort((a, b) => a - b);
+        }
+
+        // 10-digit guaranteed code
+        function generateGuaranteedNumber() {
+            let code = "";
+            for (let i = 0; i < 10; i++) {
+                code += randomInt(0, 9);
+            }
+            return code;
+        }
+
+        // 7-digit Encore
+        function generateEncoreNumber() {
+            let code = "";
+            for (let i = 0; i < 7; i++) {
+                code += randomInt(0, 9);
+            }
+            return code;
+        }
+
+        // Count main number matches
+        function countMainMatches(userNumbers, winningNumbers) {
+            let matchCount = 0;
+            userNumbers.forEach(num => {
+                if (winningNumbers.includes(num)) matchCount++;
+            });
+            return matchCount;
+        }
+
+        // Check consecutive matching digits for Encore
+        function encoreMatches(userEncore, winningEncore) {
+            if (!userEncore) return 0;
+            let matched = 0;
+            for (let i = 0; i < 7; i++) {
+                if (userEncore[i] === winningEncore[i]) matched++;
+                else break;
+            }
+            return matched;
+        }
+
+        /**************************************************************
+         * DOM ELEMENTS
+         **************************************************************/
+        const gridContainer = document.getElementById("number-grid");
+        const quickPickBtn = document.getElementById("quick-pick-btn");
+        const clearBtn = document.getElementById("clear-btn");
+        const selectedCountSpan = document.getElementById("selected-count");
+        const selectedNumbersP = document.getElementById("selected-numbers");
+
+        const encoreCheckbox = document.getElementById("encore-checkbox");
+        const drawsButtonsContainer = document.getElementById("draws-buttons-container");
+
+        const buyTicketBtn = document.getElementById("buy-ticket-btn");
+        const totalCostSpan = document.getElementById("total-cost");
+        const ticketSummaryDiv = document.getElementById("ticket-summary");
+
+        const runDrawBtn = document.getElementById("run-draw-btn");
+        const loadingSpinner = document.getElementById("loading-spinner");
+        const drawResultsDiv = document.getElementById("draw-results");
+        const winningNumbersDiv = document.getElementById("winning-numbers");
+        const winningGuaranteedSpan = document.getElementById("winning-guaranteed");
+        const winningEncoreSpan = document.getElementById("winning-encore");
+        const matchSummaryDiv = document.getElementById("match-summary");
+        const guaranteedMatchDiv = document.getElementById("guaranteed-match");
+        const encoreMatchDiv = document.getElementById("encore-match");
+        const playAgainBtn = document.getElementById("play-again-btn");
+
+        /**************************************************************
+         * GLOBAL STATE
+         **************************************************************/
+        let selectedNumbers = [];
+        let userEncore = "";
+        let userGuaranteed = "";
+        let draws = 1; // default
+        let purchased = false;
+
+        /**************************************************************
+         * CREATE NUMBER GRID (1..49)
+         **************************************************************/
+        function createNumberGrid() {
+            for (let i = MIN_NUMBER; i <= MAX_NUMBER; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.className = "grid-button";
+                btn.id = `number-${i}`;
+                btn.setAttribute("aria-pressed", "false");
+                btn.setAttribute("aria-label", `Select number ${i}`);
+                btn.addEventListener("click", () => handleNumberSelection(i, btn));
+                gridContainer.appendChild(btn);
+            }
+        }
+
+        /**************************************************************
+         * HANDLE NUMBER SELECTION
+         **************************************************************/
+        function handleNumberSelection(number, btnElement) {
+            if (purchased) return;
+
+            if (selectedNumbers.includes(number)) {
+                deselectNumber(number, btnElement);
+            } else {
+                selectNumber(number, btnElement);
+            }
+            updateSelectedDisplay();
+        }
+
+        function selectNumber(number, btnElement) {
+            if (selectedNumbers.length < MAX_SELECTION) {
+                selectedNumbers.push(number);
+                btnElement.classList.add("selected");
+                btnElement.setAttribute("aria-pressed", "true");
+            }
+        }
+
+        function deselectNumber(number, btnElement) {
+            selectedNumbers = selectedNumbers.filter(n => n !== number);
+            btnElement.classList.remove("selected");
+            btnElement.setAttribute("aria-pressed", "false");
+        }
+
+        function updateSelectedDisplay() {
+            selectedNumbers.sort((a, b) => a - b);
+            selectedCountSpan.textContent = `Selected: ${selectedNumbers.length}/${MAX_SELECTION}`;
+            selectedNumbersP.textContent = selectedNumbers.length ?
+                `Selected Numbers: ${selectedNumbers.join(", ")}` :
+                "";
+            updateTotalCostDisplay();
+        }
+
+        /**************************************************************
+         * QUICK PICK & CLEAR
+         **************************************************************/
+        quickPickBtn.addEventListener("click", () => {
+            if (purchased) return;
+            clearSelection();
+            const random6 = generateRandomNumbers(MAX_SELECTION);
+            random6.forEach(num => {
+                const btn = document.getElementById(`number-${num}`);
+                btn.classList.add("selected");
+                btn.setAttribute("aria-pressed", "true");
+            });
+            selectedNumbers = random6;
+            updateSelectedDisplay();
+        });
+
+        clearBtn.addEventListener("click", () => {
+            if (purchased) return;
+            clearSelection();
+        });
+
+        function clearSelection() {
+            selectedNumbers = [];
+            const buttons = gridContainer.querySelectorAll(".grid-button");
+            buttons.forEach(btn => {
+                btn.classList.remove("selected");
+                btn.setAttribute("aria-pressed", "false");
+            });
+            updateSelectedDisplay();
+        }
+
+        /**************************************************************
+         * CREATE DRAWS BUTTONS (1..10)
+         **************************************************************/
+        function createDrawsButtons() {
+            for (let i = 1; i <= MAX_DRAWS; i++) {
+                const btn = document.createElement("button");
+                btn.className = "draw-choice-btn";
+                btn.textContent = `${i}`;
+                btn.setAttribute("aria-label", `Select ${i} draw${i > 1 ? 's' : ''}`);
+                btn.addEventListener("click", () => selectDraws(i, btn));
+                drawsButtonsContainer.appendChild(btn);
+
+                // By default, highlight the button for draws=1
+                if (i === 1) {
+                    btn.classList.add("selected");
+                }
+            }
+        }
+
+        function selectDraws(n, btnElement) {
+            if (purchased) return; // cannot change after purchase
+            draws = n;
+            // Remove 'selected' from all
+            const allBtns = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
+            allBtns.forEach(b => b.classList.remove("selected"));
+            // Highlight this one
+            btnElement.classList.add("selected");
+            // Recalc cost
+            updateTotalCostDisplay();
+        }
+
+        /**************************************************************
+         * COST CALCULATION
+         **************************************************************/
+        function calculateTotalCost() {
+            if (selectedNumbers.length !== MAX_SELECTION) return 0;
+            const perDraw = COST_PER_DRAW + (encoreCheckbox.checked ? COST_PER_ENCORE : 0);
+            return perDraw * draws;
+        }
+
+        function updateTotalCostDisplay() {
+            const cost = calculateTotalCost();
+            totalCostSpan.textContent = `Total Cost: $${cost}`;
+        }
+
+        /**************************************************************
+         * BUY TICKET
+         **************************************************************/
+        buyTicketBtn.addEventListener("click", () => {
+                    if (selectedNumbers.length !== MAX_SELECTION) {
+                        alert("Please select exactly 6 numbers first.");
+                        return;
+                    }
+                    purchased = true;
+
+                    userGuaranteed = generateGuaranteedNumber();
+                    userEncore = encoreCheckbox.checked ? generateEncoreNumber() : "";
+
+                    const cost = calculateTotalCost();
+                    const costLine = `Total Cost (Paid): $${cost}`;
+                    ticketSummaryDiv.innerHTML = `
+                <p><strong>Your Ticket</strong></p>
+                <p>Main Numbers (6): ${selectedNumbers.join(", ")}</p>
+                <p>Guaranteed Draw #: ${userGuaranteed}</p>
+                <p>Number of Draws: ${draws}</p>
+                ${userEncore ? `<p>Encore #: ${userEncore}</p>` : ""}
+                <p><em>${costLine}</em></p>
+            `;
+
+            // Disable selection and draw options
+            const numberButtons = gridContainer.querySelectorAll(".grid-button");
+            numberButtons.forEach(btn => btn.disabled = true);
+            const drawButtons = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
+            drawButtons.forEach(btn => btn.disabled = true);
+            buyTicketBtn.disabled = true;
+            runDrawBtn.disabled = false;
+        });
+
+        /**************************************************************
+         * RUN DRAW
+         **************************************************************/
+        runDrawBtn.addEventListener("click", () => {
+            if (!purchased) {
+                alert("Please buy your ticket first!");
+                return;
+            }
+            // Disable Run Draw to prevent multiple clicks
+            runDrawBtn.disabled = true;
+            // Show loading spinner
+            loadingSpinner.classList.remove("hidden");
+            // Simulate draw with delay
+            setTimeout(() => {
+                loadingSpinner.classList.add("hidden");
+                drawResultsDiv.style.display = "block";
+                drawResultsDiv.classList.add("show");
+                simulateDraw();
+            }, 1500); // 1.5 seconds delay for simulation
+        });
+
+        function simulateDraw() {
+            // Generate winning numbers
+            const winningMain = generateRandomNumbers(6);
+            const bonus = generateRandomNumbers(1, MIN_NUMBER, MAX_NUMBER, winningMain)[0];
+            const winningGuaranteed = generateGuaranteedNumber();
+            const winningEncore = generateEncoreNumber();
+
+            // Clear old results
+            winningNumbersDiv.innerHTML = "";
+
+            // Show winning main numbers with bounce effect
+            winningMain.forEach((num, index) => {
+                const span = document.createElement("span");
+                span.classList.add("winning-number");
+                span.textContent = num;
+                // stagger the animation
+                span.style.animationDelay = `${index * 0.15}s`;
+                winningNumbersDiv.appendChild(span);
+            });
+
+            // Bonus ball
+            const bonusSpan = document.createElement("span");
+            bonusSpan.classList.add("winning-number", "bonus-number");
+            bonusSpan.textContent = bonus;
+            bonusSpan.style.animationDelay = `${winningMain.length * 0.15}s`;
+            winningNumbersDiv.appendChild(bonusSpan);
+
+            // Display guaranteed & encore
+            winningGuaranteedSpan.textContent = winningGuaranteed;
+            winningEncoreSpan.textContent = winningEncore;
+
+            // Calculate matches
+            const mainMatches = countMainMatches(selectedNumbers, winningMain);
+            const bonusMatch = selectedNumbers.includes(bonus);
+            const matchedEncoreDigits = encoreMatches(userEncore, winningEncore);
+
+            let mainMatchMsg = `You matched ${mainMatches} of the 6 main numbers.`;
+            if (mainMatches === 6) {
+                mainMatchMsg += " <strong>Jackpot Winner!</strong>";
+            } else if (mainMatches === 5 && bonusMatch) {
+                mainMatchMsg += " You got 5 + Bonus!";
+            } else if (bonusMatch) {
+                mainMatchMsg += " You also matched the Bonus!";
+            }
+            matchSummaryDiv.innerHTML = mainMatchMsg;
+
+            guaranteedMatchDiv.textContent =
+                (winningGuaranteed === userGuaranteed)
+                    ? "Guaranteed Draw match: YES! You won $1,000,000!"
+                    : "Guaranteed Draw match: No";
+
+            if (userEncore) {
+                encoreMatchDiv.textContent =
+                    `Encore digits matched (from left): ${matchedEncoreDigits} out of 7.`;
+            } else {
+                encoreMatchDiv.textContent = "Encore not played.";
+            }
+        }
+
+        /**************************************************************
+         * PLAY AGAIN
+         **************************************************************/
+        playAgainBtn.addEventListener("click", resetGame);
+
+        function resetGame() {
+            // Reset all state variables
+            selectedNumbers = [];
+            userEncore = "";
+            userGuaranteed = "";
+            draws = 1;
+            purchased = false;
+
+            // Reset UI elements
+            clearSelection();
+            encoreCheckbox.checked = false;
+            const drawButtons = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
+            drawButtons.forEach(btn => btn.classList.remove("selected"));
+            drawButtons[0].classList.add("selected");
+            draws = 1;
+            updateTotalCostDisplay();
+
+            ticketSummaryDiv.innerHTML = "";
+            drawResultsDiv.style.display = "none";
+            drawResultsDiv.classList.remove("show");
+
+            // Enable selection and draw options
+            const numberButtons = gridContainer.querySelectorAll(".grid-button");
+            numberButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove("selected");
+                btn.setAttribute("aria-pressed", "false");
+            });
+            drawButtons.forEach(btn => btn.disabled = false);
+            buyTicketBtn.disabled = false;
+            runDrawBtn.disabled = true;
+        }
+
+        /**************************************************************
+         * INITIALIZATION
+         **************************************************************/
+        function initializeApp() {
+            createNumberGrid();
+            createDrawsButtons();
+            updateSelectedDisplay();
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+
+</html>
