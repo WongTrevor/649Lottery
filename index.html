@@ -5,21 +5,22 @@
     <meta charset="UTF-8" />
     <meta name="description" content="Realistic Canada Lotto 6/49 Simulator with up to 10 draws">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotto 6/49 Simulator</title>
+    <title>Canada Lotto 6/49 Simulator</title>
+
     <style>
         /****************************************************************
          * GLOBAL RESETS & THEMES
          ****************************************************************/
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: "Arial", sans-serif;
         }
+
         /* Primary Theme Colors */
-        
-         :root {
+        :root {
             --blue-dark: #002D72;
             /* Deep Lotto Blue */
             --blue-light: #1A61C6;
@@ -32,16 +33,28 @@
             --text-dark: #333;
             --background-gradient-start: #F5F9FF;
             --background-gradient-end: #BED1F2;
+            --background-gradient-start-dark: #2c3e50;
+            --background-gradient-end-dark: #34495e;
+            --text-light: #ecf0f1;
+            --button-radius: 6px;
+            --button-padding: 0.7rem 1.2rem;
         }
-        
+
         body {
             background: linear-gradient(to bottom right, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
             color: var(--text-dark);
+            transition: background 0.3s ease, color 0.3s ease;
+            position: relative;
         }
-        
+
+        body.dark-mode {
+            background: linear-gradient(to bottom right, var(--background-gradient-start-dark) 0%, var(--background-gradient-end-dark) 100%);
+            color: var(--text-light);
+        }
+
         main {
             flex: 1;
             width: 90%;
@@ -51,25 +64,88 @@
             border-radius: 8px;
             padding: 1rem 2rem 2rem;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease, color 0.3s ease;
+            position: relative;
         }
+
+        body.dark-mode main {
+            background: #34495e;
+            color: var(--text-light);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
         /****************************************************************
          * HEADER & FOOTER
          ****************************************************************/
-        
+
         header {
             text-align: center;
             background: var(--blue-dark);
             color: var(--white);
             padding: 1.5rem;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
+
         header h1 {
             font-size: 2rem;
             margin-bottom: 0.5rem;
             letter-spacing: 1px;
         }
-        
+
+        /* User Info Display */
+        #user-info {
+            position: absolute;
+            top: 1rem;
+            right: 6rem; /* Adjusted to accommodate the theme toggle */
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: var(--button-radius);
+            color: var(--white);
+            font-weight: bold;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        body.dark-mode #user-info {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+
+        /* Dark Mode Toggle Button */
+        #theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: 2px solid var(--white);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease, border 0.3s ease;
+            z-index: 1000;
+        }
+
+        body.dark-mode #theme-toggle {
+            border: 2px solid var(--text-light);
+        }
+
+        #theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #theme-toggle:focus {
+            outline: 3px solid var(--blue-light);
+        }
+
         footer {
             text-align: center;
             background: var(--blue-dark);
@@ -77,79 +153,112 @@
             padding: 1rem;
             margin-top: 2rem;
         }
+
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        footer em {
+            color: #ccc;
+        }
+
         /****************************************************************
          * SECTIONS & HEADINGS
          ****************************************************************/
-        
+
         .section {
             border-bottom: 1px solid #ddd;
             padding: 1rem 0 2rem;
             margin-bottom: 2rem;
+            transition: background 0.3s ease, color 0.3s ease;
+            display: none; /* Hide all sections by default */
         }
-        
+
+        .section.active {
+            display: block; /* Show the active section */
+        }
+
+        body.dark-mode .section {
+            background: #2c3e50;
+            border-bottom: 1px solid #555;
+        }
+
         .section:last-of-type {
             border-bottom: none;
             margin-bottom: 0;
         }
-        
+
         .section h2 {
             text-align: center;
             font-size: 1.6rem;
             margin-bottom: 1rem;
             color: var(--blue-dark);
+            transition: color 0.3s ease;
         }
-        
+
+        body.dark-mode .section h2 {
+            color: var(--text-light);
+        }
+
         .step-description {
             margin-bottom: 1rem;
             line-height: 1.4;
+            font-size: 0.95rem;
         }
+
+        body.dark-mode .step-description {
+            color: var(--text-light);
+        }
+
         /****************************************************************
          * NUMBER GRID (1-49)
          ****************************************************************/
-        
+
         #number-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 8px;
             margin: 1rem 0;
         }
-        
+
         .grid-button {
             background: #E3F2FD;
             border: 2px solid transparent;
             color: var(--text-dark);
-            border-radius: 6px;
+            border-radius: var(--button-radius);
             font-size: 1rem;
             font-weight: bold;
-            padding: 0.7rem;
+            padding: var(--button-padding);
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
             box-shadow: 0 3px #b3b3b3;
             position: relative;
+            /* IMPORTANT: Prevent default form-submit if in a form (type=button ensures it). */
         }
+
         /* Hover with slight 3D lift */
-        
         .grid-button:hover:not([disabled]) {
             transform: translateY(-2px) scale(1.03);
             box-shadow: 0 6px #aaa;
             background: #BBDEFB;
         }
+
         /* Press */
-        
         .grid-button:active:not([disabled]) {
             transform: translateY(3px) scale(0.97);
             box-shadow: 0 0 #bbb;
         }
+
         /* Selected -> red */
-        
         .grid-button.selected {
             background: var(--accent-red);
             color: var(--white);
             border: 2px solid #B71C1C;
             box-shadow: 0 3px #961919;
+            transform: scale(1.05);
         }
+
         /* Additional Indicator for Selected State */
-        
         .grid-button.selected::after {
             content: '✔';
             position: absolute;
@@ -165,10 +274,29 @@
             font-size: 0.8rem;
             color: var(--accent-red);
         }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .grid-button {
+            background: #2980b9;
+            color: var(--text-light);
+            box-shadow: 0 3px #1c5980;
+        }
+
+        body.dark-mode .grid-button:hover:not([disabled]) {
+            background: #3498db;
+        }
+
+        body.dark-mode .grid-button.selected {
+            background: var(--accent-red);
+            color: var(--white);
+            border: 2px solid #B71C1C;
+            box-shadow: 0 3px #961919;
+        }
+
         /****************************************************************
          * CONTROLS & BUTTONS
          ****************************************************************/
-        
+
         .controls {
             margin-top: 1rem;
             display: flex;
@@ -176,63 +304,73 @@
             gap: 1rem;
             align-items: center;
         }
-        
-        .controls button,
-        .controls input[type="checkbox"] {
-            cursor: pointer;
-        }
-        
+
         .controls button {
-            padding: 0.7rem 1.2rem;
+            padding: var(--button-padding);
             border: none;
-            border-radius: 6px;
+            border-radius: var(--button-radius);
             background: var(--blue-dark);
             color: var(--white);
             font-size: 1rem;
             font-weight: bold;
             box-shadow: 0 3px #001a47;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            cursor: pointer;
+            /* CRUCIAL to prevent form submission (if any form): */
+            type: button;
         }
-        
+
         .controls button:hover:not([disabled]) {
             transform: translateY(-2px) scale(1.04);
             box-shadow: 0 5px #000f2e;
             background-color: var(--blue-light);
         }
-        
+
         .controls button:active:not([disabled]) {
             transform: translateY(3px) scale(0.96);
             box-shadow: 0 0 #000f2e;
         }
-        
+
         .controls button:disabled {
             background: #ccc;
+            color: var(--text-dark);
             cursor: not-allowed;
             box-shadow: none;
         }
-        
+
         .controls .clear-btn {
             background: #757575;
             box-shadow: 0 3px #5f5f5f;
         }
-        
+
         .controls .clear-btn:hover:not([disabled]) {
             background: #616161;
         }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .controls button {
+            background: #1abc9c;
+            box-shadow: 0 3px #16a085;
+        }
+
+        body.dark-mode .controls button:hover:not([disabled]) {
+            background-color: #16a085;
+        }
+
         /****************************************************************
-         * DRAWS BUTTONS (1 to 10)
+         * DRAWS BUTTONS (1-10)
          ****************************************************************/
-        
+
         #draws-buttons-container {
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
         }
-        
+
         .draw-choice-btn {
-            padding: 0.7rem 1.2rem;
+            padding: var(--button-padding);
             border: none;
-            border-radius: 6px;
+            border-radius: var(--button-radius);
             font-weight: bold;
             background: #e0e0e0;
             color: var(--blue-dark);
@@ -240,31 +378,49 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
             flex: 1 1 40px;
             text-align: center;
+            min-width: 40px;
+            type: button;
         }
-        
+
         .draw-choice-btn:hover:not([disabled]) {
             transform: translateY(-2px) scale(1.04);
             background: #d6d6d6;
         }
-        
+
         .draw-choice-btn:active:not([disabled]) {
             transform: translateY(3px) scale(0.96);
             box-shadow: 0 0 #bababa;
         }
-        
+
         .draw-choice-btn.selected {
             background: var(--blue-dark);
             color: var(--white);
             box-shadow: 0 3px #001a47;
         }
-        
+
         .draw-choice-btn:focus {
             outline: 3px solid var(--blue-light);
         }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .draw-choice-btn {
+            background: #2980b9;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .draw-choice-btn:hover:not([disabled]) {
+            background: #3498db;
+        }
+
+        body.dark-mode .draw-choice-btn.selected {
+            background: var(--blue-light);
+            color: var(--white);
+        }
+
         /****************************************************************
          * TICKET INFO & COST
          ****************************************************************/
-        
+
         #ticket-summary {
             margin-top: 1rem;
             background: #FAFAFA;
@@ -273,15 +429,131 @@
             font-size: 0.95rem;
             line-height: 1.5;
             border: 1px solid #ddd;
+            transition: background 0.3s ease, color 0.3s ease;
         }
-        
+
+        body.dark-mode #ticket-summary {
+            background: #34495e;
+            color: var(--text-light);
+            border: 1px solid #555;
+        }
+
         #ticket-summary p {
             margin-bottom: 0.5rem;
         }
+
+        /* Odds Information */
+        #odds-info {
+            margin-top: 1rem;
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 0.9rem;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode #odds-info {
+            background: #2c3e50;
+            border: 1px solid #555;
+            color: var(--text-light);
+        }
+
+        /* Odds Cards */
+        .odds-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .odds-card {
+            perspective: 1000px;
+        }
+
+        .odds-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .odds-card-front,
+        .odds-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .odds-card-front {
+            background: #ffffff;
+            color: var(--text-dark);
+            animation: flipIn 0.6s forwards;
+        }
+
+        .odds-card-back {
+            background: var(--blue-dark);
+            color: var(--white);
+            transform: rotateY(180deg);
+        }
+
+        /* 3D Styling Enhancements */
+        .odds-card-front {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+        }
+
+        .odds-card-back {
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-light) 100%);
+        }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .odds-card-front {
+            background: #1c2a3a;
+            color: var(--text-light);
+            box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .odds-card-back {
+            background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+            color: var(--text-dark);
+        }
+
+        /* Odds Text Styling */
+        .odds-card-front h3,
+        .odds-card-back p {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .odds-card-back p {
+            font-size: 0.9rem;
+        }
+
+        /* Transition for Smooth Flip */
+        .odds-card-inner {
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .odds-card:hover .odds-card-inner {
+            transform: rotateY(180deg);
+        }
+
         /****************************************************************
          * DRAW RESULTS
          ****************************************************************/
-        
+
         #draw-results {
             margin-top: 1rem;
             background: #FAFAFA;
@@ -290,33 +562,38 @@
             display: none;
             /* hidden until user runs the draw */
             border: 1px solid #ddd;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.5s ease, background 0.3s ease, color 0.3s ease;
             opacity: 0;
         }
-        
+
         #draw-results.show {
+            display: block;
             opacity: 1;
         }
-        
+
         #draw-results h3 {
             text-align: center;
             color: var(--blue-dark);
             margin-bottom: 1rem;
         }
-        
+
+        body.dark-mode #draw-results h3 {
+            color: var(--text-light);
+        }
+
         .result-line {
             margin: 0.5rem 0;
         }
+
         /* Container for winning numbers */
-        
         .winning-numbers {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             margin-bottom: 1rem;
         }
+
         /* Ball style with bounce animation */
-        
         .winning-number {
             background: var(--blue-dark);
             color: var(--white);
@@ -332,67 +609,393 @@
             transform: translateY(-60px) scale(0);
             animation: bounceIn 0.65s forwards cubic-bezier(0.22, 1.42, 0.36, 1);
         }
-        
+
         .bonus-number {
             background: var(--bonus-red);
         }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .winning-number {
+            background: #2980b9;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .bonus-number {
+            background: var(--bonus-red);
+        }
+
+        /* Share Buttons */
+        .share-buttons {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .share-buttons button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            background: #55acee;
+            /* Twitter Blue */
+            color: var(--white);
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            type: button;
+        }
+
+        .share-buttons button.facebook {
+            background: #3b5998;
+            /* Facebook Blue */
+        }
+
+        .share-buttons button:hover {
+            opacity: 0.8;
+        }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .share-buttons button {
+            color: var(--text-dark);
+        }
+
+        /****************************************************************
+         * FAVORITES SECTION
+         ****************************************************************/
+
+        #favorites-list {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .favorite-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .favorite-btn {
+            padding: 0.5rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            background: #ffeb3b;
+            color: var(--blue-dark);
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            type: button;
+        }
+
+        .favorite-btn:hover {
+            background: #fdd835;
+        }
+
+        .delete-favorite-btn {
+            background: transparent;
+            border: none;
+            color: #d32f2f;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-favorite-btn:hover {
+            color: #b71c1c;
+        }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .favorite-btn {
+            background: #f1c40f;
+            color: var(--text-light);
+        }
+
+        body.dark-mode .favorite-btn:hover {
+            background: #f39c12;
+        }
+
+        body.dark-mode .delete-favorite-btn {
+            color: #e74c3c;
+        }
+
+        body.dark-mode .delete-favorite-btn:hover {
+            color: #c0392b;
+        }
+
+        /****************************************************************
+         * DRAW HISTORY SECTION
+         ****************************************************************/
+
+        #draw-history {
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 0.9rem;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode #draw-history {
+            background: #2c3e50;
+            border: 1px solid #555;
+            color: var(--text-light);
+        }
+
+        .draw-item {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .draw-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .draw-item p {
+            margin-bottom: 0.3rem;
+        }
+
+        .delete-draw-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #d32f2f;
+            border: none;
+            color: #fff;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .delete-draw-btn:hover {
+            background: #b71c1c;
+        }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .draw-item p {
+            color: var(--text-light);
+        }
+
+        body.dark-mode .delete-draw-btn {
+            background: #e74c3c;
+        }
+
+        body.dark-mode .delete-draw-btn:hover {
+            background: #c0392b;
+        }
+
+        /****************************************************************
+         * SPINNER
+         ****************************************************************/
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--blue-dark);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Dark Mode Adjustments */
+        body.dark-mode .spinner {
+            border-top: 4px solid var(--text-light);
+        }
+
         /****************************************************************
          * KEYFRAME ANIMATIONS
          ****************************************************************/
-        
+
         @keyframes bounceIn {
             0% {
                 transform: translateY(-60px) scale(0);
                 opacity: 0;
             }
+
             60% {
                 transform: translateY(10px) scale(1.2);
                 opacity: 1;
             }
+
             80% {
                 transform: translateY(-5px) scale(0.95);
             }
+
             100% {
                 transform: translateY(0) scale(1);
                 opacity: 1;
             }
         }
+
+        /* 3D Flip Animation for Odds Cards */
+        @keyframes flipIn {
+            from {
+                transform: rotateY(-90deg);
+                opacity: 0;
+            }
+
+            to {
+                transform: rotateY(0deg);
+                opacity: 1;
+            }
+        }
+
+        /****************************************************************
+         * STEP PROGRESS INDICATOR
+         ****************************************************************/
+
+        #step-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            width: 100%;
+            position: relative;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .step::before {
+            content: attr(data-step);
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            line-height: 25px;
+            border: 2px solid #999;
+            border-radius: 50%;
+            background-color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .step.active::before,
+        .step.completed::before {
+            background-color: var(--blue-dark);
+            border-color: var(--blue-dark);
+            color: var(--white);
+        }
+
+        .step.completed::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: var(--blue-dark);
+            z-index: -1;
+        }
+
+        .step:last-child::after {
+            content: none;
+        }
+
+        .step.active,
+        .step.completed {
+            color: var(--blue-dark);
+        }
+
+        body.dark-mode .step {
+            color: #ccc;
+        }
+
+        body.dark-mode .step.active::before,
+        body.dark-mode .step.completed::before {
+            background-color: var(--blue-light);
+            border-color: var(--blue-light);
+            color: var(--white);
+        }
+
+        body.dark-mode .step.completed::after {
+            background-color: var(--blue-light);
+        }
+
         /****************************************************************
          * RESPONSIVE
          ****************************************************************/
-        
         @media (max-width: 768px) {
             #number-grid {
                 grid-template-columns: repeat(5, 1fr);
             }
+
             .controls {
                 flex-direction: column;
                 align-items: flex-start;
             }
+
             .controls button {
                 width: 100%;
             }
         }
-        
+
         @media (max-width: 480px) {
             #number-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
+
             .draw-choice-btn {
                 flex: 1 1 30%;
             }
+
+            #user-info {
+                position: static;
+                margin-top: 1rem;
+            }
+
+            #theme-toggle {
+                position: static;
+                margin-left: auto;
+                margin-top: 1rem;
+            }
         }
+
         /* Focus styles for accessibility */
-        
-        .grid-button:focus {
+        .grid-button:focus,
+        .draw-choice-btn:focus,
+        .controls button:focus,
+        #theme-toggle:focus {
             outline: 3px solid var(--blue-light);
         }
+
         /* Hidden class for managing visibility */
-        
         .hidden {
             display: none;
         }
-        
+
         .visible {
             display: block;
         }
@@ -403,29 +1006,56 @@
     <header>
         <h1>Canada Lotto 6/49 Simulator</h1>
         <p>Up to 10 Draws, Correct Cost Calculation &amp; 3D Buttons</p>
+
+        <!-- User Info Display -->
+        <div id="user-info" aria-live="polite">
+            <span id="user-name">Name: admin</span>
+            <span id="user-balance">Balance: $10,000,000</span>
+        </div>
+
+        <!-- Dark Mode Toggle Button -->
+        <button id="theme-toggle" type="button" aria-label="Toggle Dark Mode">
+            🌙
+        </button>
     </header>
 
     <main>
+        <!-- STEP PROGRESS INDICATOR -->
+        <div id="step-progress">
+            <div class="step active" data-step="1">Select Numbers</div>
+            <div class="step" data-step="2">Encore (Optional)</div>
+            <div class="step" data-step="3">Number of Draws</div>
+            <div class="step" data-step="4">Purchase Ticket</div>
+            <div class="step" data-step="5">Simulate Draw</div>
+            <div class="step" data-step="6">Favorites</div>
+            <div class="step" data-step="7">Past Draws</div>
+        </div>
+
         <!-- STEP 1: Pick 6 Numbers -->
-        <section class="section">
+        <section class="section active" id="step-1">
             <h2>1. Choose Your 6 Numbers</h2>
             <p class="step-description">
-                Select <strong>exactly 6 distinct numbers</strong> from 1 to 49. Chosen numbers turn <span style="color: var(--accent-red)">red</span> with a checkmark. Or use <em>Quick Pick</em> to auto-select 6 random numbers for you.
+                Select <strong>exactly 6 distinct numbers</strong> from 1 to 49. Chosen numbers turn <span style="color: var(--accent-red)">red</span> with a checkmark.
             </p>
             <div id="number-grid" role="grid" aria-label="Number selection grid">
                 <!-- Number buttons will be generated by JavaScript -->
             </div>
 
             <div class="controls">
-                <button id="quick-pick-btn">Quick Pick</button>
-                <button class="clear-btn" id="clear-btn">Clear Selection</button>
+                <button id="quick-pick-btn" type="button">Quick Pick</button>
+                <button class="clear-btn" id="clear-btn" type="button">Clear Selection</button>
                 <span id="selected-count" style="margin-left:auto; font-weight:bold;">Selected: 0/6</span>
             </div>
             <p id="selected-numbers" style="margin-top:0.5rem; font-size:0.9rem;"></p>
+
+            <div class="controls">
+                <!-- IMPORTANT: type="button" and disabled initially -->
+                <button id="next-btn-1" type="button" disabled>Next</button>
+            </div>
         </section>
 
         <!-- STEP 2: Encore (Optional) -->
-        <section class="section">
+        <section class="section" id="step-2">
             <h2>2. Encore (Optional)</h2>
             <p class="step-description">
                 Encore is <strong>$1</strong> extra per draw. Match all 7 Encore digits (left to right) for a chance at up to $1,000,000.
@@ -436,61 +1066,68 @@
                     <span style="margin-left:0.5rem;">Add Encore ($1)</span>
                 </label>
             </div>
+
+            <div class="controls">
+                <button id="prev-btn-2" type="button">Previous</button>
+                <button id="next-btn-2" type="button">Next</button>
+            </div>
         </section>
 
-        <!-- STEP 3: Number of Draws (1-10 with separate buttons) -->
-        <section class="section">
+        <!-- STEP 3: Number of Draws -->
+        <section class="section" id="step-3">
             <h2>3. Number of Draws</h2>
             <p class="step-description">
-                Click a button below to set how many consecutive draws you want (from <strong>1</strong> to <strong>10</strong>).
+                Choose how many consecutive draws (1 to 10).
             </p>
             <div id="draws-buttons-container" class="controls" role="group" aria-label="Number of draws selection">
                 <!-- Draw buttons will be generated by JavaScript -->
             </div>
+
+            <div class="controls">
+                <button id="prev-btn-3" type="button">Previous</button>
+                <button id="next-btn-3" type="button">Next</button>
+            </div>
         </section>
 
         <!-- STEP 4: Purchase Ticket -->
-        <section class="section">
+        <section class="section" id="step-4">
             <h2>4. Purchase Your Ticket</h2>
             <p class="step-description">
                 Each Lotto 6/49 play costs <strong>$3</strong>. Encore (if selected) costs
-                <strong>$1</strong> more per draw. The total is multiplied by the number of draws.
+                <strong>$1</strong> more per draw.
             </p>
             <div class="controls">
-                <button id="buy-ticket-btn">Buy Ticket</button>
+                <button id="prev-btn-4" type="button">Previous</button>
+                <button id="buy-ticket-btn" type="button">Buy Ticket</button>
                 <span id="total-cost" style="margin-left:auto; font-weight:bold;">Total Cost: $0</span>
             </div>
             <div id="ticket-summary"></div>
+
+            <div class="controls">
+                <button id="next-btn-4" type="button" disabled>Next</button>
+            </div>
         </section>
 
         <!-- STEP 5: Simulate Draw -->
-        <section class="section">
+        <section class="section" id="step-5">
             <h2>5. Simulate Draw</h2>
             <p class="step-description">
-                After you buy your ticket, run the draw to see the winning numbers and check your match results!
+                After buying your ticket, run the draw to see the winning numbers!
             </p>
             <div class="controls">
-                <button id="run-draw-btn" disabled>Run Draw &amp; Check Winnings</button>
+                <button id="prev-btn-5" type="button">Previous</button>
+                <button id="run-draw-btn" type="button" disabled>Run Draw &amp; Check Winnings</button>
             </div>
             <!-- Loading Spinner -->
             <div id="loading-spinner" class="hidden">
+                <div class="spinner"></div>
                 <p>Simulating draw...</p>
-                <!-- Add a CSS spinner here if desired -->
             </div>
             <!-- RESULTS -->
             <div id="draw-results" class="hidden">
                 <h3>Official Draw Results</h3>
-                <div>
-                    <p><strong>Main Winning Numbers (6 + Bonus):</strong></p>
-                    <div class="winning-numbers" id="winning-numbers"></div>
-                </div>
-                <div class="result-line">
-                    <strong>Guaranteed Draw Winner #:</strong>
-                    <span id="winning-guaranteed" style="margin-left:0.5rem; font-weight:bold;"></span>
-                </div>
-                <div class="result-line">
-                    <strong>Encore Winner #:</strong>
-                    <span id="winning-encore" style="margin-left:0.5rem; font-weight:bold;"></span>
+                <div id="draw-results-container">
+                    <!-- Individual draw results will be displayed here -->
                 </div>
                 <hr style="margin:1rem 0;">
                 <h3>Your Match Results</h3>
@@ -499,11 +1136,58 @@
                 <div id="encore-match" class="result-line"></div>
 
                 <div style="margin-top:1rem; text-align:center;">
-                    <button id="play-again-btn">Play Again</button>
+                    <button id="play-again-btn" type="button">Play Again</button>
+                </div>
+                <div class="share-buttons">
+                    <button id="share-twitter" class="twitter" type="button" aria-label="Share on Twitter">
+                        <!-- Twitter SVG Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" viewBox="0 0 24 24">
+                            <path
+                                d="M24 4.557a9.93 9.93 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724 9.864 9.864 0 0 1-3.127 1.195 4.916 4.916 0 0 0-8.384 4.482A13.94 13.94 0 0 1 1.671 3.149a4.916 4.916 0 0 0 1.523 6.574 4.897 4.897 0 0 1-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.935 4.935 0 0 1-2.224.084 4.918 4.918 0 0 0 4.588 3.417A9.867 9.867 0 0 1 0 19.54a13.94 13.94 0 0 0 7.548 2.212c9.058 0 14.01-7.514 14.01-14.01 0-.213-.005-.425-.014-.636A10.025 10.025 0 0 0 24 4.557z" />
+                        </svg>
+                        Share on Twitter
+                    </button>
+                    <button id="share-facebook" class="facebook" type="button" aria-label="Share on Facebook">
+                        <!-- Facebook SVG Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35C.595 0 0 .593 0 1.326v21.348C0 23.407.595 24 1.325 24h11.495v-9.294H9.691V11.07h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.636h-3.12V24h6.116C23.405 24 24 23.407 24 22.674V1.326C24 .593 23.405 0 22.675 0z" />
+                        </svg>
+                        Share on Facebook
+                    </button>
                 </div>
                 <p style="margin-top:1rem; font-size:0.9rem; text-align:center;">
                     <em>Demo only. Actual draws, odds, and prizes vary.</em>
                 </p>
+            </div>
+
+            <div class="controls">
+                <button id="next-btn-5" type="button" disabled>Next</button>
+            </div>
+        </section>
+
+        <!-- STEP 6: Favorites -->
+        <section class="section" id="step-6">
+            <h2>6. Favorites</h2>
+            <button id="save-favorite-btn" type="button">Save as Favorite</button>
+            <div id="favorites-list"></div>
+
+            <div class="controls">
+                <button id="prev-btn-6" type="button">Previous</button>
+                <button id="next-btn-6" type="button">Next</button>
+            </div>
+        </section>
+
+        <!-- STEP 7: Past Draws History -->
+        <section class="section" id="step-7">
+            <h2>7. Past Draws</h2>
+            <div id="draw-history" class="result-line">
+                <!-- Past draw results displayed here -->
+            </div>
+
+            <div class="controls">
+                <button id="prev-btn-7" type="button">Previous</button>
+                <button id="restart-btn" type="button">Restart</button>
             </div>
         </section>
     </main>
@@ -525,389 +1209,652 @@
         const COST_PER_DRAW = 3;
         const COST_PER_ENCORE = 1;
         const MAX_DRAWS = 10;
+        const MAX_DRAW_HISTORY = 15; // Maximum number of draw history entries
 
         /**************************************************************
-         * UTILITY FUNCTIONS
+         * APPLICATION MODULE
          **************************************************************/
-        function randomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
+        const LottoSimulator = (() => {
+            // State
+            let selectedNumbers = [];
+            let userEncore = "";
+            let userGuaranteed = "";
+            let draws = 1;
+            let purchased = false;
 
-        // Generate N unique random numbers in [min, max]
-        function generateRandomNumbers(count, min = MIN_NUMBER, max = MAX_NUMBER, exclude = []) {
-            const set = new Set();
-            while (set.size < count) {
-                const num = randomInt(min, max);
-                if (!exclude.includes(num)) set.add(num);
-            }
-            return Array.from(set).sort((a, b) => a - b);
-        }
+            // User Info
+            let userName = "admin";
+            let userBalance = 10000000;
 
-        // 10-digit guaranteed code
-        function generateGuaranteedNumber() {
-            let code = "";
-            for (let i = 0; i < 10; i++) {
-                code += randomInt(0, 9);
-            }
-            return code;
-        }
+            // DOM References
+            const gridContainer = document.getElementById("number-grid");
+            const quickPickBtn = document.getElementById("quick-pick-btn");
+            const clearBtn = document.getElementById("clear-btn");
+            const selectedCountSpan = document.getElementById("selected-count");
+            const selectedNumbersP = document.getElementById("selected-numbers");
 
-        // 7-digit Encore
-        function generateEncoreNumber() {
-            let code = "";
-            for (let i = 0; i < 7; i++) {
-                code += randomInt(0, 9);
-            }
-            return code;
-        }
+            const encoreCheckbox = document.getElementById("encore-checkbox");
+            const drawsButtonsContainer = document.getElementById("draws-buttons-container");
 
-        // Count main number matches
-        function countMainMatches(userNumbers, winningNumbers) {
-            let matchCount = 0;
-            userNumbers.forEach(num => {
-                if (winningNumbers.includes(num)) matchCount++;
-            });
-            return matchCount;
-        }
+            const buyTicketBtn = document.getElementById("buy-ticket-btn");
+            const totalCostSpan = document.getElementById("total-cost");
+            const ticketSummaryDiv = document.getElementById("ticket-summary");
 
-        // Check consecutive matching digits for Encore
-        function encoreMatches(userEncore, winningEncore) {
-            if (!userEncore) return 0;
-            let matched = 0;
-            for (let i = 0; i < 7; i++) {
-                if (userEncore[i] === winningEncore[i]) matched++;
-                else break;
-            }
-            return matched;
-        }
+            const runDrawBtn = document.getElementById("run-draw-btn");
+            const loadingSpinner = document.getElementById("loading-spinner");
+            const drawResultsDiv = document.getElementById("draw-results");
+            const drawResultsContainer = document.getElementById("draw-results-container");
+            const matchSummaryDiv = document.getElementById("match-summary");
+            const guaranteedMatchDiv = document.getElementById("guaranteed-match");
+            const encoreMatchDiv = document.getElementById("encore-match");
+            const playAgainBtn = document.getElementById("play-again-btn");
 
-        /**************************************************************
-         * DOM ELEMENTS
-         **************************************************************/
-        const gridContainer = document.getElementById("number-grid");
-        const quickPickBtn = document.getElementById("quick-pick-btn");
-        const clearBtn = document.getElementById("clear-btn");
-        const selectedCountSpan = document.getElementById("selected-count");
-        const selectedNumbersP = document.getElementById("selected-numbers");
+            const stepProgress = document.getElementById("step-progress");
+            const steps = document.querySelectorAll(".step");
+            let currentStep = 1;
 
-        const encoreCheckbox = document.getElementById("encore-checkbox");
-        const drawsButtonsContainer = document.getElementById("draws-buttons-container");
+            const userBalanceDisplay = document.getElementById("user-balance");
+            const themeToggleBtn = document.getElementById("theme-toggle");
 
-        const buyTicketBtn = document.getElementById("buy-ticket-btn");
-        const totalCostSpan = document.getElementById("total-cost");
-        const ticketSummaryDiv = document.getElementById("ticket-summary");
+            const saveFavoriteBtn = document.getElementById("save-favorite-btn");
+            const favoritesListDiv = document.getElementById("favorites-list");
 
-        const runDrawBtn = document.getElementById("run-draw-btn");
-        const loadingSpinner = document.getElementById("loading-spinner");
-        const drawResultsDiv = document.getElementById("draw-results");
-        const winningNumbersDiv = document.getElementById("winning-numbers");
-        const winningGuaranteedSpan = document.getElementById("winning-guaranteed");
-        const winningEncoreSpan = document.getElementById("winning-encore");
-        const matchSummaryDiv = document.getElementById("match-summary");
-        const guaranteedMatchDiv = document.getElementById("guaranteed-match");
-        const encoreMatchDiv = document.getElementById("encore-match");
-        const playAgainBtn = document.getElementById("play-again-btn");
+            const drawHistoryDiv = document.getElementById("draw-history");
 
-        /**************************************************************
-         * GLOBAL STATE
-         **************************************************************/
-        let selectedNumbers = [];
-        let userEncore = "";
-        let userGuaranteed = "";
-        let draws = 1; // default
-        let purchased = false;
+            /**************************************************************
+             * UTILS
+             **************************************************************/
+            const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        /**************************************************************
-         * CREATE NUMBER GRID (1..49)
-         **************************************************************/
-        function createNumberGrid() {
-            for (let i = MIN_NUMBER; i <= MAX_NUMBER; i++) {
-                const btn = document.createElement("button");
-                btn.textContent = i;
-                btn.className = "grid-button";
-                btn.id = `number-${i}`;
-                btn.setAttribute("aria-pressed", "false");
-                btn.setAttribute("aria-label", `Select number ${i}`);
-                btn.addEventListener("click", () => handleNumberSelection(i, btn));
-                gridContainer.appendChild(btn);
-            }
-        }
+            // Generate N unique random numbers in [min, max]
+            const generateRandomNumbers = (count, min = 1, max = 49, exclude = []) => {
+                const set = new Set();
+                while (set.size < count) {
+                    const num = randomInt(min, max);
+                    if (!exclude.includes(num)) set.add(num);
+                }
+                return [...set].sort((a, b) => a - b);
+            };
 
-        /**************************************************************
-         * HANDLE NUMBER SELECTION
-         **************************************************************/
-        function handleNumberSelection(number, btnElement) {
-            if (purchased) return;
+            const generateGuaranteedNumber = () => {
+                let code = "";
+                for (let i = 0; i < 10; i++) {
+                    code += randomInt(0, 9);
+                }
+                return code;
+            };
 
-            if (selectedNumbers.includes(number)) {
-                deselectNumber(number, btnElement);
-            } else {
-                selectNumber(number, btnElement);
-            }
-            updateSelectedDisplay();
-        }
+            const generateEncoreNumber = () => {
+                let code = "";
+                for (let i = 0; i < 7; i++) {
+                    code += randomInt(0, 9);
+                }
+                return code;
+            };
 
-        function selectNumber(number, btnElement) {
-            if (selectedNumbers.length < MAX_SELECTION) {
-                selectedNumbers.push(number);
-                btnElement.classList.add("selected");
-                btnElement.setAttribute("aria-pressed", "true");
-            }
-        }
+            const countMainMatches = (userNumbers, winningNumbers) =>
+                userNumbers.filter(num => winningNumbers.includes(num)).length;
 
-        function deselectNumber(number, btnElement) {
-            selectedNumbers = selectedNumbers.filter(n => n !== number);
-            btnElement.classList.remove("selected");
-            btnElement.setAttribute("aria-pressed", "false");
-        }
+            const encoreMatches = (userEncore, winningEncore) => {
+                if (!userEncore) return 0;
+                let matched = 0;
+                for (let i = 0; i < 7; i++) {
+                    if (userEncore[i] === winningEncore[i]) matched++;
+                    else break;
+                }
+                return matched;
+            };
 
-        function updateSelectedDisplay() {
-            selectedNumbers.sort((a, b) => a - b);
-            selectedCountSpan.textContent = `Selected: ${selectedNumbers.length}/${MAX_SELECTION}`;
-            selectedNumbersP.textContent = selectedNumbers.length ?
-                `Selected Numbers: ${selectedNumbers.join(", ")}` :
-                "";
-            updateTotalCostDisplay();
-        }
+            /**************************************************************
+             * DOM CREATION & UPDATE
+             **************************************************************/
+            const createNumberGrid = () => {
+                for (let i = MIN_NUMBER; i <= MAX_NUMBER; i++) {
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.textContent = i;
+                    btn.className = "grid-button";
+                    btn.id = `number-${i}`;
+                    btn.setAttribute("aria-pressed", "false");
+                    btn.addEventListener("click", () => handleNumberClick(i, btn));
+                    gridContainer.appendChild(btn);
+                }
+            };
 
-        /**************************************************************
-         * QUICK PICK & CLEAR
-         **************************************************************/
-        quickPickBtn.addEventListener("click", () => {
-            if (purchased) return;
-            clearSelection();
-            const random6 = generateRandomNumbers(MAX_SELECTION);
-            random6.forEach(num => {
-                const btn = document.getElementById(`number-${num}`);
+            const handleNumberClick = (num, btn) => {
+                if (purchased) return;
+                // Toggle
+                if (selectedNumbers.includes(num)) {
+                    selectedNumbers = selectedNumbers.filter(x => x !== num);
+                    btn.classList.remove("selected");
+                    btn.setAttribute("aria-pressed", "false");
+                } else {
+                    if (selectedNumbers.length < MAX_SELECTION) {
+                        selectedNumbers.push(num);
+                        btn.classList.add("selected");
+                        btn.setAttribute("aria-pressed", "true");
+                    }
+                }
+                updateSelectedDisplay();
+                updateNextButtonStates();
+            };
+
+            const updateSelectedDisplay = () => {
+                selectedNumbers.sort((a, b) => a - b);
+                selectedCountSpan.textContent = `Selected: ${selectedNumbers.length}/${MAX_SELECTION}`;
+                selectedNumbersP.textContent = selectedNumbers.length
+                    ? `Selected Numbers: ${selectedNumbers.join(", ")}`
+                    : "";
+                updateCostDisplay();
+            };
+
+            const updateCostDisplay = () => {
+                const cost = calculateTotalCost();
+                totalCostSpan.textContent = `Total Cost: $${cost}`;
+            };
+
+            const createDrawsButtons = () => {
+                for (let i = 1; i <= MAX_DRAWS; i++) {
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.classList.add("draw-choice-btn");
+                    btn.textContent = String(i);
+                    btn.addEventListener("click", () => {
+                        if (!purchased) selectDraws(i, btn);
+                    });
+                    if (i === 1) {
+                        btn.classList.add("selected");
+                        btn.setAttribute("aria-pressed", "true");
+                    } else {
+                        btn.setAttribute("aria-pressed", "false");
+                    }
+                    drawsButtonsContainer.appendChild(btn);
+                }
+            };
+
+            const selectDraws = (n, btn) => {
+                draws = n;
+                const allBtns = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
+                allBtns.forEach(b => {
+                    b.classList.remove("selected");
+                    b.setAttribute("aria-pressed", "false");
+                });
                 btn.classList.add("selected");
                 btn.setAttribute("aria-pressed", "true");
-            });
-            selectedNumbers = random6;
-            updateSelectedDisplay();
-        });
+                updateCostDisplay();
+            };
 
-        clearBtn.addEventListener("click", () => {
-            if (purchased) return;
-            clearSelection();
-        });
+            /**************************************************************
+             * ACTIONS
+             **************************************************************/
+            const calculateTotalCost = () => {
+                if (selectedNumbers.length !== MAX_SELECTION) return 0;
+                const baseCost = COST_PER_DRAW;
+                const encoreCost = encoreCheckbox.checked ? COST_PER_ENCORE : 0;
+                return (baseCost + encoreCost) * draws;
+            };
 
-        function clearSelection() {
-            selectedNumbers = [];
-            const buttons = gridContainer.querySelectorAll(".grid-button");
-            buttons.forEach(btn => {
-                btn.classList.remove("selected");
-                btn.setAttribute("aria-pressed", "false");
-            });
-            updateSelectedDisplay();
-        }
-
-        /**************************************************************
-         * CREATE DRAWS BUTTONS (1..10)
-         **************************************************************/
-        function createDrawsButtons() {
-            for (let i = 1; i <= MAX_DRAWS; i++) {
-                const btn = document.createElement("button");
-                btn.className = "draw-choice-btn";
-                btn.textContent = `${i}`;
-                btn.setAttribute("aria-label", `Select ${i} draw${i > 1 ? 's' : ''}`);
-                btn.addEventListener("click", () => selectDraws(i, btn));
-                drawsButtonsContainer.appendChild(btn);
-
-                // By default, highlight the button for draws=1
-                if (i === 1) {
+            const handleQuickPick = () => {
+                if (purchased) return;
+                clearSelection();
+                const randNums = generateRandomNumbers(MAX_SELECTION, MIN_NUMBER, MAX_NUMBER);
+                randNums.forEach(num => {
+                    const btn = document.getElementById(`number-${num}`);
                     btn.classList.add("selected");
+                    btn.setAttribute("aria-pressed", "true");
+                });
+                selectedNumbers = randNums;
+                updateSelectedDisplay();
+                updateNextButtonStates();
+            };
+
+            const clearSelection = () => {
+                selectedNumbers = [];
+                const btns = gridContainer.querySelectorAll(".grid-button");
+                btns.forEach(b => {
+                    b.classList.remove("selected");
+                    b.setAttribute("aria-pressed", "false");
+                });
+                updateSelectedDisplay();
+                updateNextButtonStates();
+            };
+
+            const handleBuyTicket = () => {
+                if (selectedNumbers.length !== MAX_SELECTION) {
+                    alert("Please select exactly 6 numbers first.");
+                    return;
                 }
-            }
-        }
+                const totalCost = calculateTotalCost();
+                if (userBalance < totalCost) {
+                    alert("Insufficient balance!");
+                    return;
+                }
+                userBalance -= totalCost;
+                userBalanceDisplay.textContent = `Balance: $${userBalance.toLocaleString()}`;
+                purchased = true;
+                userGuaranteed = generateGuaranteedNumber();
+                userEncore = encoreCheckbox.checked ? generateEncoreNumber() : "";
 
-        function selectDraws(n, btnElement) {
-            if (purchased) return; // cannot change after purchase
-            draws = n;
-            // Remove 'selected' from all
-            const allBtns = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
-            allBtns.forEach(b => b.classList.remove("selected"));
-            // Highlight this one
-            btnElement.classList.add("selected");
-            // Recalc cost
-            updateTotalCostDisplay();
-        }
+                ticketSummaryDiv.innerHTML = `
+                    <p><strong>Your Ticket</strong></p>
+                    <p>Main Numbers (6): ${selectedNumbers.join(", ")}</p>
+                    <p>Guaranteed Draw #: ${userGuaranteed}</p>
+                    <p>Number of Draws: ${draws}</p>
+                    ${userEncore ? `<p>Encore #: ${userEncore}</p>` : ""}
+                    <p><em>Total Cost (Paid): $${totalCost}</em></p>
+                `;
 
-        /**************************************************************
-         * COST CALCULATION
-         **************************************************************/
-        function calculateTotalCost() {
-            if (selectedNumbers.length !== MAX_SELECTION) return 0;
-            const perDraw = COST_PER_DRAW + (encoreCheckbox.checked ? COST_PER_ENCORE : 0);
-            return perDraw * draws;
-        }
+                // Disable changes
+                gridContainer.querySelectorAll(".grid-button").forEach(b => (b.disabled = true));
+                drawsButtonsContainer.querySelectorAll(".draw-choice-btn").forEach(b => (b.disabled = true));
+                buyTicketBtn.disabled = true;
+                runDrawBtn.disabled = false;
 
-        function updateTotalCostDisplay() {
-            const cost = calculateTotalCost();
-            totalCostSpan.textContent = `Total Cost: $${cost}`;
-        }
+                // Enable Next
+                document.getElementById("next-btn-4").disabled = false;
+                alert("Ticket purchased!");
+            };
 
-        /**************************************************************
-         * BUY TICKET
-         **************************************************************/
-        buyTicketBtn.addEventListener("click", () => {
-                    if (selectedNumbers.length !== MAX_SELECTION) {
-                        alert("Please select exactly 6 numbers first.");
-                        return;
+            const handleRunDraw = () => {
+                if (!purchased) {
+                    alert("Please buy your ticket first.");
+                    return;
+                }
+                runDrawBtn.disabled = true;
+                loadingSpinner.classList.remove("hidden");
+                setTimeout(() => {
+                    loadingSpinner.classList.add("hidden");
+                    drawResultsDiv.classList.remove("hidden");
+                    drawResultsDiv.classList.add("show");
+                    simulateDraw();
+                }, 1200);
+            };
+
+            const simulateDraw = () => {
+                const results = [];
+                for (let i = 0; i < draws; i++) {
+                    const winningMain = generateRandomNumbers(6);
+                    const bonus = generateRandomNumbers(1, MIN_NUMBER, MAX_NUMBER, winningMain)[0];
+                    const winningGuaranteed = generateGuaranteedNumber();
+                    const winningEncore = generateEncoreNumber();
+
+                    const mainMatches = countMainMatches(selectedNumbers, winningMain);
+                    const bonusMatch = selectedNumbers.includes(bonus);
+                    const matchedEncoreDigits = encoreMatches(userEncore, winningEncore);
+
+                    let prize = 0;
+                    if (mainMatches === 6) {
+                        prize = 5000000;
+                    } else if (mainMatches === 5 && bonusMatch) {
+                        prize = 100000;
+                    } else if (mainMatches === 5) {
+                        prize = 1000;
+                    } else if (mainMatches === 4) {
+                        prize = 100;
+                    } else if (mainMatches === 3) {
+                        prize = 10;
+                    } else if (mainMatches === 2) {
+                        prize = 5;
                     }
-                    purchased = true;
 
-                    userGuaranteed = generateGuaranteedNumber();
-                    userEncore = encoreCheckbox.checked ? generateEncoreNumber() : "";
+                    if (matchedEncoreDigits > 0) {
+                        // Example: $500 per matched digit
+                        prize += matchedEncoreDigits * 500;
+                    }
 
-                    const cost = calculateTotalCost();
-                    const costLine = `Total Cost (Paid): $${cost}`;
-                    ticketSummaryDiv.innerHTML = `
-                <p><strong>Your Ticket</strong></p>
-                <p>Main Numbers (6): ${selectedNumbers.join(", ")}</p>
-                <p>Guaranteed Draw #: ${userGuaranteed}</p>
-                <p>Number of Draws: ${draws}</p>
-                ${userEncore ? `<p>Encore #: ${userEncore}</p>` : ""}
-                <p><em>${costLine}</em></p>
-            `;
+                    const drawResult = {
+                        drawIndex: i + 1,
+                        winningMain,
+                        bonus,
+                        winningGuaranteed,
+                        winningEncore,
+                        mainMatches,
+                        bonusMatch,
+                        matchedEncoreDigits,
+                        prize,
+                        date: new Date().toLocaleString()
+                    };
 
-            // Disable selection and draw options
-            const numberButtons = gridContainer.querySelectorAll(".grid-button");
-            numberButtons.forEach(btn => btn.disabled = true);
-            const drawButtons = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
-            drawButtons.forEach(btn => btn.disabled = true);
-            buyTicketBtn.disabled = true;
-            runDrawBtn.disabled = false;
+                    results.push(drawResult);
+
+                    // Save to Draw History
+                    saveToDrawHistory(drawResult);
+                }
+                displayDrawResults(results);
+                displayMatchSummary(results);
+                displayDrawHistory(); // Update the Draw History display
+                // Enable Next
+                document.getElementById("next-btn-5").disabled = false;
+            };
+
+            const displayDrawResults = (drawsData) => {
+                drawResultsContainer.innerHTML = "";
+                drawsData.forEach(d => {
+                    const div = document.createElement("div");
+                    div.classList.add("draw-item");
+                    div.innerHTML = `
+                        <h4>Draw ${d.drawIndex} (${d.date}):</h4>
+                        <div class="winning-numbers">
+                            ${d.winningMain.map(num => `<div class="winning-number">${num}</div>`).join('')}
+                            <div class="winning-number bonus-number">${d.bonus}</div>
+                        </div>
+                        <p>Guaranteed #: ${d.winningGuaranteed}</p>
+                        <p>Encore #: ${d.winningEncore}</p>
+                        <p>Your Matches: ${d.mainMatches} ${d.bonusMatch ? "(+ Bonus)" : ""}</p>
+                        ${d.matchedEncoreDigits ? `<p>Encore Match: ${d.matchedEncoreDigits}/7</p>` : ""}
+                        <p><strong>Prize: $${d.prize}</strong></p>
+                    `;
+                    drawResultsContainer.appendChild(div);
+                });
+            };
+
+            const displayMatchSummary = (drawsData) => {
+                let totalPrize = 0;
+                let totalMainMatches = 0;
+                let totalBonusMatches = 0;
+                let totalEncoreDigits = 0;
+
+                drawsData.forEach(d => {
+                    totalPrize += d.prize;
+                    totalMainMatches += d.mainMatches;
+                    if (d.bonusMatch) totalBonusMatches++;
+                    totalEncoreDigits += d.matchedEncoreDigits;
+                });
+
+                matchSummaryDiv.innerHTML = `In ${drawsData.length} draw${drawsData.length > 1 ? 's' : ''}, total main number matches: ${totalMainMatches}`;
+                guaranteedMatchDiv.innerHTML = "Guaranteed Draw match: Not this time.";
+                encoreMatchDiv.innerHTML = userEncore
+                    ? `Encore digits matched (cumulative): ${totalEncoreDigits}`
+                    : "Encore not played.";
+
+                if (totalPrize > 0) {
+                    userBalance += totalPrize;
+                    userBalanceDisplay.textContent = `Balance: $${userBalance.toLocaleString()}`;
+                    alert(`You won a total of $${totalPrize} across all draws!`);
+                } else {
+                    alert("Sorry, no winnings this time.");
+                }
+            };
+
+            const handlePlayAgain = () => resetGame();
+
+            const resetGame = () => {
+                selectedNumbers = [];
+                userEncore = "";
+                userGuaranteed = "";
+                draws = 1;
+                purchased = false;
+
+                // UI Reset
+                clearSelection();
+                encoreCheckbox.checked = false;
+                drawsButtonsContainer.querySelectorAll(".draw-choice-btn").forEach((b, i) => {
+                    b.classList.remove("selected");
+                    b.disabled = false; // Re-enable draw buttons
+                    b.setAttribute("aria-pressed", "false");
+                    if (i === 0) {
+                        b.classList.add("selected");
+                        b.setAttribute("aria-pressed", "true");
+                    }
+                });
+                ticketSummaryDiv.innerHTML = "";
+                drawResultsDiv.classList.add("hidden");
+                drawResultsDiv.classList.remove("show");
+                drawResultsContainer.innerHTML = "";
+                matchSummaryDiv.textContent = "";
+                guaranteedMatchDiv.textContent = "";
+                encoreMatchDiv.textContent = "";
+                runDrawBtn.disabled = true;
+                buyTicketBtn.disabled = false;
+                document.getElementById("next-btn-4").disabled = true;
+                document.getElementById("next-btn-5").disabled = true;
+                navigateToStep(1);
+
+                // Re-enable number buttons after reset
+                gridContainer.querySelectorAll(".grid-button").forEach(b => {
+                    b.disabled = false;
+                    b.classList.remove("selected");
+                    b.setAttribute("aria-pressed", "false");
+                });
+
+                // Optionally, decide whether to clear draw history on reset
+                // Uncomment the following lines to clear draw history upon restart
+                /*
+                localStorage.removeItem('drawHistory');
+                displayDrawHistory();
+                */
+
+                alert("Game has been reset!");
+            };
+
+            const handleSaveFavorite = () => {
+                if (selectedNumbers.length !== MAX_SELECTION) {
+                    alert("Select exactly 6 numbers to save as a favorite.");
+                    return;
+                }
+                let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+                const favKey = JSON.stringify(selectedNumbers);
+                if (!favorites.includes(favKey)) {
+                    favorites.push(favKey);
+                    localStorage.setItem("favorites", JSON.stringify(favorites));
+                    alert("Favorite saved!");
+                } else {
+                    alert("This combination is already in favorites.");
+                }
+                displayFavorites();
+            };
+
+            const handleDeleteFavorite = (favKey) => {
+                let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+                const index = favorites.indexOf(favKey);
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                    localStorage.setItem("favorites", JSON.stringify(favorites));
+                    alert("Favorite removed!");
+                    displayFavorites();
+                }
+            };
+
+            const displayFavorites = () => {
+                let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+                favoritesListDiv.innerHTML = favorites
+                    .map(fav => {
+                        const nums = JSON.parse(fav);
+                        return `
+                            <div class="favorite-item">
+                                <button class="favorite-btn" type="button">${nums.join(", ")}</button>
+                                <button class="delete-favorite-btn" type="button" aria-label="Delete favorite ${nums.join(", ")}">✖️</button>
+                            </div>
+                        `;
+                    })
+                    .join("");
+                const favBtns = favoritesListDiv.querySelectorAll(".favorite-btn");
+                const deleteFavBtns = favoritesListDiv.querySelectorAll(".delete-favorite-btn");
+                favBtns.forEach((btn, index) => {
+                    btn.addEventListener("click", () => {
+                        if (purchased) return;
+                        const fav = favorites[index];
+                        const nums = JSON.parse(fav);
+                        clearSelection();
+                        nums.forEach(num => {
+                            selectedNumbers.push(num);
+                            const gridBtn = document.getElementById(`number-${num}`);
+                            if (gridBtn) {
+                                gridBtn.classList.add("selected");
+                                gridBtn.setAttribute("aria-pressed", "true");
+                            }
+                        });
+                        updateSelectedDisplay();
+                        updateNextButtonStates();
+                    });
+                });
+                deleteFavBtns.forEach((btn, index) => {
+                    btn.addEventListener("click", (e) => {
+                        e.stopPropagation(); // Prevent triggering the favorite button
+                        const fav = favorites[index];
+                        handleDeleteFavorite(fav);
+                    });
+                });
+            };
+
+            const saveToDrawHistory = (drawResult) => {
+                let drawHistory = JSON.parse(localStorage.getItem("drawHistory") || "[]");
+                // Automatically delete the oldest draw if exceeding MAX_DRAW_HISTORY
+                if (drawHistory.length >= MAX_DRAW_HISTORY) {
+                    drawHistory.shift(); // Remove the first (oldest) draw
+                }
+                drawHistory.push(drawResult);
+                localStorage.setItem("drawHistory", JSON.stringify(drawHistory));
+            };
+
+            const displayDrawHistory = () => {
+                let drawHistory = JSON.parse(localStorage.getItem("drawHistory") || "[]");
+                if (drawHistory.length === 0) {
+                    drawHistoryDiv.innerHTML = "<p>No past draws yet.</p>";
+                    return;
+                }
+
+                drawHistoryDiv.innerHTML = drawHistory
+                    .map((d, index) => {
+                        return `
+                            <div class="draw-item" data-index="${index}">
+                                <h4>Draw ${d.drawIndex} (${d.date}):</h4>
+                                <div class="winning-numbers">
+                                    ${d.winningMain.map(num => `<div class="winning-number">${num}</div>`).join('')}
+                                    <div class="winning-number bonus-number">${d.bonus}</div>
+                                </div>
+                                <p>Guaranteed #: ${d.winningGuaranteed}</p>
+                                <p>Encore #: ${d.winningEncore}</p>
+                                <p>Your Matches: ${d.mainMatches} ${d.bonusMatch ? "(+ Bonus)" : ""}</p>
+                                ${d.matchedEncoreDigits ? `<p>Encore Match: ${d.matchedEncoreDigits}/7</p>` : ""}
+                                <p><strong>Prize: $${d.prize}</strong></p>
+                                <button class="delete-draw-btn" type="button" aria-label="Delete Draw ${d.drawIndex}">✖️</button>
+                            </div>
+                        `;
+                    })
+                    .join("");
+                // Add event listeners for delete buttons
+                const deleteDrawBtns = drawHistoryDiv.querySelectorAll(".delete-draw-btn");
+                deleteDrawBtns.forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const drawItem = e.target.closest(".draw-item");
+                        const index = parseInt(drawItem.getAttribute("data-index"));
+                        handleDeleteDraw(index);
+                    });
+                });
+            };
+
+            const handleDeleteDraw = (index) => {
+                let drawHistory = JSON.parse(localStorage.getItem("drawHistory") || "[]");
+                if (index >= 0 && index < drawHistory.length) {
+                    const confirmDelete = confirm(`Are you sure you want to delete Draw ${drawHistory[index].drawIndex}?`);
+                    if (confirmDelete) {
+                        drawHistory.splice(index, 1);
+                        localStorage.setItem("drawHistory", JSON.stringify(drawHistory));
+                        displayDrawHistory();
+                        alert("Draw deleted successfully!");
+                    }
+                }
+            };
+
+            /**************************************************************
+             * NAVIGATION
+             **************************************************************/
+            const navigateToStep = (stepNum) => {
+                document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+                const target = document.getElementById(`step-${stepNum}`);
+                if (target) target.classList.add("active");
+                updateStepProgress(stepNum);
+                currentStep = stepNum;
+                window.scrollTo(0, 0);
+            };
+
+            const updateStepProgress = (stepNum) => {
+                steps.forEach((s, idx) => {
+                    const sNum = idx + 1;
+                    if (sNum < stepNum) {
+                        s.classList.add("completed");
+                        s.classList.remove("active");
+                    } else if (sNum === stepNum) {
+                        s.classList.add("active");
+                        s.classList.remove("completed");
+                    } else {
+                        s.classList.remove("completed", "active");
+                    }
+                });
+            };
+
+            const updateNextButtonStates = () => {
+                // Step 1 next
+                const next1 = document.getElementById("next-btn-1");
+                if (selectedNumbers.length === MAX_SELECTION) {
+                    next1.disabled = false;
+                } else {
+                    next1.disabled = true;
+                }
+            };
+
+            const initEventListeners = () => {
+                quickPickBtn.addEventListener("click", handleQuickPick);
+                clearBtn.addEventListener("click", clearSelection);
+
+                buyTicketBtn.addEventListener("click", handleBuyTicket);
+                runDrawBtn.addEventListener("click", handleRunDraw);
+                playAgainBtn.addEventListener("click", handlePlayAgain);
+
+                // Navigation
+                document.getElementById("next-btn-1").addEventListener("click", () => navigateToStep(2));
+                document.getElementById("prev-btn-2").addEventListener("click", () => navigateToStep(1));
+                document.getElementById("next-btn-2").addEventListener("click", () => navigateToStep(3));
+                document.getElementById("prev-btn-3").addEventListener("click", () => navigateToStep(2));
+                document.getElementById("next-btn-3").addEventListener("click", () => navigateToStep(4));
+                document.getElementById("prev-btn-4").addEventListener("click", () => navigateToStep(3));
+                document.getElementById("next-btn-4").addEventListener("click", () => navigateToStep(5));
+                document.getElementById("prev-btn-5").addEventListener("click", () => navigateToStep(4));
+                document.getElementById("next-btn-5").addEventListener("click", () => navigateToStep(6));
+                document.getElementById("prev-btn-6").addEventListener("click", () => navigateToStep(5));
+                document.getElementById("next-btn-6").addEventListener("click", () => navigateToStep(7));
+                document.getElementById("prev-btn-7").addEventListener("click", () => navigateToStep(6));
+                document.getElementById("restart-btn").addEventListener("click", () => {
+                    const confirmRestart = confirm("Are you sure you want to restart the game? This will clear your current selections.");
+                    if (confirmRestart) {
+                        resetGame();
+                    }
+                });
+
+                saveFavoriteBtn.addEventListener("click", handleSaveFavorite);
+
+                // Theme toggle
+                themeToggleBtn.addEventListener("click", () => {
+                    document.body.classList.toggle("dark-mode");
+                    themeToggleBtn.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+                });
+
+                // Initialize Draw History on Load
+                window.addEventListener("load", displayDrawHistory);
+            };
+
+            const loadFavorites = () => {
+                displayFavorites();
+            };
+
+            const initialize = () => {
+                createNumberGrid();
+                createDrawsButtons();
+                initEventListeners();
+                loadFavorites();
+                displayDrawHistory();
+            };
+
+            return { initialize };
+        })();
+
+        /**************************************************************
+         * INIT
+         **************************************************************/
+        window.addEventListener("DOMContentLoaded", () => {
+            LottoSimulator.initialize();
         });
-
-        /**************************************************************
-         * RUN DRAW
-         **************************************************************/
-        runDrawBtn.addEventListener("click", () => {
-            if (!purchased) {
-                alert("Please buy your ticket first!");
-                return;
-            }
-            // Disable Run Draw to prevent multiple clicks
-            runDrawBtn.disabled = true;
-            // Show loading spinner
-            loadingSpinner.classList.remove("hidden");
-            // Simulate draw with delay
-            setTimeout(() => {
-                loadingSpinner.classList.add("hidden");
-                drawResultsDiv.style.display = "block";
-                drawResultsDiv.classList.add("show");
-                simulateDraw();
-            }, 1500); // 1.5 seconds delay for simulation
-        });
-
-        function simulateDraw() {
-            // Generate winning numbers
-            const winningMain = generateRandomNumbers(6);
-            const bonus = generateRandomNumbers(1, MIN_NUMBER, MAX_NUMBER, winningMain)[0];
-            const winningGuaranteed = generateGuaranteedNumber();
-            const winningEncore = generateEncoreNumber();
-
-            // Clear old results
-            winningNumbersDiv.innerHTML = "";
-
-            // Show winning main numbers with bounce effect
-            winningMain.forEach((num, index) => {
-                const span = document.createElement("span");
-                span.classList.add("winning-number");
-                span.textContent = num;
-                // stagger the animation
-                span.style.animationDelay = `${index * 0.15}s`;
-                winningNumbersDiv.appendChild(span);
-            });
-
-            // Bonus ball
-            const bonusSpan = document.createElement("span");
-            bonusSpan.classList.add("winning-number", "bonus-number");
-            bonusSpan.textContent = bonus;
-            bonusSpan.style.animationDelay = `${winningMain.length * 0.15}s`;
-            winningNumbersDiv.appendChild(bonusSpan);
-
-            // Display guaranteed & encore
-            winningGuaranteedSpan.textContent = winningGuaranteed;
-            winningEncoreSpan.textContent = winningEncore;
-
-            // Calculate matches
-            const mainMatches = countMainMatches(selectedNumbers, winningMain);
-            const bonusMatch = selectedNumbers.includes(bonus);
-            const matchedEncoreDigits = encoreMatches(userEncore, winningEncore);
-
-            let mainMatchMsg = `You matched ${mainMatches} of the 6 main numbers.`;
-            if (mainMatches === 6) {
-                mainMatchMsg += " <strong>Jackpot Winner!</strong>";
-            } else if (mainMatches === 5 && bonusMatch) {
-                mainMatchMsg += " You got 5 + Bonus!";
-            } else if (bonusMatch) {
-                mainMatchMsg += " You also matched the Bonus!";
-            }
-            matchSummaryDiv.innerHTML = mainMatchMsg;
-
-            guaranteedMatchDiv.textContent =
-                (winningGuaranteed === userGuaranteed)
-                    ? "Guaranteed Draw match: YES! You won $1,000,000!"
-                    : "Guaranteed Draw match: No";
-
-            if (userEncore) {
-                encoreMatchDiv.textContent =
-                    `Encore digits matched (from left): ${matchedEncoreDigits} out of 7.`;
-            } else {
-                encoreMatchDiv.textContent = "Encore not played.";
-            }
-        }
-
-        /**************************************************************
-         * PLAY AGAIN
-         **************************************************************/
-        playAgainBtn.addEventListener("click", resetGame);
-
-        function resetGame() {
-            // Reset all state variables
-            selectedNumbers = [];
-            userEncore = "";
-            userGuaranteed = "";
-            draws = 1;
-            purchased = false;
-
-            // Reset UI elements
-            clearSelection();
-            encoreCheckbox.checked = false;
-            const drawButtons = drawsButtonsContainer.querySelectorAll(".draw-choice-btn");
-            drawButtons.forEach(btn => btn.classList.remove("selected"));
-            drawButtons[0].classList.add("selected");
-            draws = 1;
-            updateTotalCostDisplay();
-
-            ticketSummaryDiv.innerHTML = "";
-            drawResultsDiv.style.display = "none";
-            drawResultsDiv.classList.remove("show");
-
-            // Enable selection and draw options
-            const numberButtons = gridContainer.querySelectorAll(".grid-button");
-            numberButtons.forEach(btn => {
-                btn.disabled = false;
-                btn.classList.remove("selected");
-                btn.setAttribute("aria-pressed", "false");
-            });
-            drawButtons.forEach(btn => btn.disabled = false);
-            buyTicketBtn.disabled = false;
-            runDrawBtn.disabled = true;
-        }
-
-        /**************************************************************
-         * INITIALIZATION
-         **************************************************************/
-        function initializeApp() {
-            createNumberGrid();
-            createDrawsButtons();
-            updateSelectedDisplay();
-        }
-
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 
