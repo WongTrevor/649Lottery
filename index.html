@@ -38,6 +38,9 @@
             --text-light: #ecf0f1;
             --button-radius: 6px;
             --button-padding: 0.7rem 1.2rem;
+            --progress-gradient: linear-gradient(90deg, #1A61C6, #D32F2F);
+            --progress-bg: #e0e0e0;
+            --step-size: 40px;
         }
 
         body {
@@ -132,6 +135,7 @@
             justify-content: center;
             transition: background 0.3s ease, border 0.3s ease;
             z-index: 1000;
+            font-size: 1.2rem;
         }
 
         body.dark-mode #theme-toggle {
@@ -876,89 +880,166 @@
          * STEP PROGRESS INDICATOR
          ****************************************************************/
 
+        /* Enhanced Step Progress Indicator */
         #step-progress {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 2rem;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        /* Progress Line */
+        #step-progress::before {
+            content: '';
+            position: absolute;
+            top: 20px; /* Center vertically based on step size */
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: var(--progress-bg);
+            z-index: -1;
+            border-radius: 2px;
+        }
+
+        #step-progress::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: var(--progress-gradient);
+            z-index: -1;
+            border-radius: 2px;
+            transition: width 0.4s ease;
         }
 
         .step {
-            width: 100%;
             position: relative;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #999;
+            flex: 1;
+            cursor: pointer;
         }
 
-        .step::before {
-            content: attr(data-step);
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            line-height: 25px;
-            border: 2px solid #999;
+        /* Step Icons */
+        .step .icon {
+            display: block;
+            margin: 0 auto 8px;
+            width: 30px;
+            height: 30px;
+            background: #ccc;
             border-radius: 50%;
-            background-color: #fff;
-            margin-bottom: 0.5rem;
+            position: relative;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .step.active::before,
-        .step.completed::before {
-            background-color: var(--blue-dark);
-            border-color: var(--blue-dark);
-            color: var(--white);
-        }
-
-        .step.completed::after {
-            content: '';
+        .step .icon svg {
+            width: 16px;
+            height: 16px;
+            fill: #fff;
             position: absolute;
-            top: 12px;
-            left: 50%;
-            width: 100%;
-            height: 2px;
-            background-color: var(--blue-dark);
-            z-index: -1;
+            top: 7px;
+            left: 7px;
         }
 
-        .step:last-child::after {
-            content: none;
+        /* Active Step */
+        .step.active .icon {
+            background: var(--blue-dark);
+            transform: scale(1.1);
         }
 
-        .step.active,
-        .step.completed {
+        /* Completed Step */
+        .step.completed .icon {
+            background: var(--blue-light);
+        }
+
+        /* Step Labels */
+        .step .label {
+            display: block;
+            color: inherit;
+            font-weight: normal;
+            transition: color 0.3s ease;
+        }
+
+        .step.completed .label,
+        .step.active .label {
             color: var(--blue-dark);
+            font-weight: bold;
         }
 
-        body.dark-mode .step {
-            color: #ccc;
+        /* Connecting Line for Completed Steps */
+        .step.completed ~ .step::before {
+            background: var(--progress-gradient);
         }
 
-        body.dark-mode .step.active::before,
-        body.dark-mode .step.completed::before {
-            background-color: var(--blue-light);
-            border-color: var(--blue-light);
+        /* Tooltip for Steps */
+        .step:hover::after {
+            content: attr(data-step);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--blue-dark);
             color: var(--white);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0.9;
         }
 
-        body.dark-mode .step.completed::after {
-            background-color: var(--blue-light);
+        /* Dark Mode Adjustments */
+        body.dark-mode #step-progress::before {
+            background-color: #555;
         }
 
-        /****************************************************************
-         * RESPONSIVE
-         ****************************************************************/
+        body.dark-mode .step:hover::after {
+            background: var(--blue-light);
+        }
+
+        body.dark-mode .step.completed .label,
+        body.dark-mode .step.active .label {
+            color: var(--blue-light);
+        }
+
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
-            #number-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-
-            .controls {
+            #step-progress {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 0;
             }
 
-            .controls button {
-                width: 100%;
+            #step-progress::before,
+            #step-progress::after {
+                top: 15px;
+                left: 35px;
+                right: auto;
+                width: 4px;
+                height: 100%;
+                transition: height 0.4s ease;
+            }
+
+            #step-progress::after {
+                width: 4px;
+                height: 0%;
+            }
+
+            .step {
+                flex: none;
+                margin-left: 40px;
+                margin-bottom: 20px;
+            }
+
+            .step:hover::after {
+                top: -40px;
+                left: 35px;
+                transform: translateX(0);
             }
         }
 
@@ -987,7 +1068,8 @@
         .grid-button:focus,
         .draw-choice-btn:focus,
         .controls button:focus,
-        #theme-toggle:focus {
+        #theme-toggle:focus,
+        .step:focus {
             outline: 3px solid var(--blue-light);
         }
 
@@ -1022,13 +1104,101 @@
     <main>
         <!-- STEP PROGRESS INDICATOR -->
         <div id="step-progress">
-            <div class="step active" data-step="1">Select Numbers</div>
-            <div class="step" data-step="2">Encore (Optional)</div>
-            <div class="step" data-step="3">Number of Draws</div>
-            <div class="step" data-step="4">Purchase Ticket</div>
-            <div class="step" data-step="5">Simulate Draw</div>
-            <div class="step" data-step="6">Favorites</div>
-            <div class="step" data-step="7">Past Draws</div>
+            <div class="step active" data-step="Select Numbers" tabindex="0">
+                <span class="icon">
+                    <!-- Select Numbers Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14l-5-5 1.41-1.41L12 14.17l4.59-4.58L18 10l-6 6z" />
+                    </svg>
+                </span>
+                <span class="label">Select Numbers</span>
+            </div>
+            <div class="step" data-step="Encore (Optional)" tabindex="0">
+                <span class="icon">
+                    <!-- Encore Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10
+                            10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2zm4 8h-2v-4h2v4zm0-6h-2V7h2v4z" />
+                    </svg>
+                </span>
+                <span class="label">Encore (Optional)</span>
+            </div>
+            <div class="step" data-step="Number of Draws" tabindex="0">
+                <span class="icon">
+                    <!-- Number of Draws Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0
+                            1.1.9 2 2 2h14c1.1 0 2-.9
+                            2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7
+                            7h10v2H7V7zm0 4h10v2H7v-2zm0
+                            4h10v2H7v-2z" />
+                    </svg>
+                </span>
+                <span class="label">Number of Draws</span>
+            </div>
+            <div class="step" data-step="Purchase Ticket" tabindex="0">
+                <span class="icon">
+                    <!-- Purchase Ticket Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2
+                            2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9
+                            2-2V5c0-1.1-.9-2-2-2zm-1
+                            16H6V7h12v12zm-6-10l-4
+                            4 1.41 1.41L12 11.83l2.59
+                            2.59L16 13l-4-4z" />
+                    </svg>
+                </span>
+                <span class="label">Purchase Ticket</span>
+            </div>
+            <div class="step" data-step="Simulate Draw" tabindex="0">
+                <span class="icon">
+                    <!-- Simulate Draw Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M12 4V1L8 5l4 4V6c3.31
+                            0 6 2.69 6 6s-2.69 6-6
+                            6-6-2.69-6-6H6c0 4.42 3.58
+                            8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                    </svg>
+                </span>
+                <span class="label">Simulate Draw</span>
+            </div>
+            <div class="step" data-step="Favorites" tabindex="0">
+                <span class="icon">
+                    <!-- Favorites Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4
+                            15.36 2 12.28 2 8.5 2
+                            5.42 4.42 3 7.5 3c1.74 0
+                            3.41.81 4.5 2.09C13.09
+                            3.81 14.76 3 16.5 3 19.58
+                            3 22 5.42 22 8.5c0 3.78-3.4
+                            6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                </span>
+                <span class="label">Favorites</span>
+            </div>
+            <div class="step" data-step="Past Draws" tabindex="0">
+                <span class="icon">
+                    <!-- Past Draws Icon (SVG) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M13 3c-4.97 0-9
+                            4.03-9 9s4.03 9 9 9 9-4.03
+                            9-9-4.03-9-9-9zm0 16c-3.87
+                            0-7-3.13-7-7s3.13-7
+                            7-7 7 3.13 7 7-3.13
+                            7-7 7zm-1-11h2v6h-2V8zm0
+                            8h2v2h-2v-2z" />
+                    </svg>
+                </span>
+                <span class="label">Past Draws</span>
+            </div>
         </div>
 
         <!-- STEP 1: Pick 6 Numbers -->
@@ -1151,7 +1321,16 @@
                         <!-- Facebook SVG Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" viewBox="0 0 24 24">
                             <path
-                                d="M22.675 0h-21.35C.595 0 0 .593 0 1.326v21.348C0 23.407.595 24 1.325 24h11.495v-9.294H9.691V11.07h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.636h-3.12V24h6.116C23.405 24 24 23.407 24 22.674V1.326C24 .593 23.405 0 22.675 0z" />
+                                d="M22.675 0h-21.35C.595 0 0 .593 0
+                                1.326v21.348C0 23.407.595 24
+                                1.325 24h11.495v-9.294H9.691V11.07h3.129V8.413c0-3.1
+                                1.893-4.788 4.659-4.788 1.325
+                                0 2.463.099 2.795.143v3.24l-1.918.001c-1.504
+                                0-1.795.715-1.795
+                                1.763v2.313h3.587l-.467
+                                3.636h-3.12V24h6.116C23.405
+                                24 24 23.407 24 22.674V1.326C24
+                                .593 23.405 0 22.675 0z" />
                         </svg>
                         Share on Facebook
                     </button>
@@ -1337,6 +1516,7 @@
                 }
                 updateSelectedDisplay();
                 updateNextButtonStates();
+                updateProgressStep();
             };
 
             const updateSelectedDisplay = () => {
@@ -1382,6 +1562,7 @@
                 btn.classList.add("selected");
                 btn.setAttribute("aria-pressed", "true");
                 updateCostDisplay();
+                updateProgressStep();
             };
 
             /**************************************************************
@@ -1406,6 +1587,7 @@
                 selectedNumbers = randNums;
                 updateSelectedDisplay();
                 updateNextButtonStates();
+                updateProgressStep();
             };
 
             const clearSelection = () => {
@@ -1417,6 +1599,7 @@
                 });
                 updateSelectedDisplay();
                 updateNextButtonStates();
+                updateProgressStep();
             };
 
             const handleBuyTicket = () => {
@@ -1453,6 +1636,7 @@
                 // Enable Next
                 document.getElementById("next-btn-4").disabled = false;
                 alert("Ticket purchased!");
+                updateProgressStep();
             };
 
             const handleRunDraw = () => {
@@ -1525,6 +1709,7 @@
                 displayDrawHistory(); // Update the Draw History display
                 // Enable Next
                 document.getElementById("next-btn-5").disabled = false;
+                updateProgressStep();
             };
 
             const displayDrawResults = (drawsData) => {
@@ -1625,6 +1810,7 @@
                 */
 
                 alert("Game has been reset!");
+                updateProgressStep();
             };
 
             const handleSaveFavorite = () => {
@@ -1686,6 +1872,7 @@
                         });
                         updateSelectedDisplay();
                         updateNextButtonStates();
+                        updateProgressStep();
                     });
                 });
                 deleteFavBtns.forEach((btn, index) => {
@@ -1782,6 +1969,23 @@
                         s.classList.remove("completed", "active");
                     }
                 });
+
+                // Update progress line
+                const progressPercent = ((stepNum - 1) / (steps.length - 1)) * 100;
+                stepProgress.querySelector('::after')?.remove(); // Remove existing
+                // Update the width of the progress line
+                const progressLine = document.createElement('style');
+                progressLine.innerHTML = `
+                    #step-progress::after {
+                        width: ${progressPercent}%;
+                    }
+                `;
+                document.head.appendChild(progressLine);
+            };
+
+            const updateProgressStep = () => {
+                const activeStep = Array.from(steps).findIndex(step => step.classList.contains("active")) + 1;
+                updateStepProgress(activeStep);
             };
 
             const updateNextButtonStates = () => {
@@ -1832,6 +2036,17 @@
 
                 // Initialize Draw History on Load
                 window.addEventListener("load", displayDrawHistory);
+
+                // Keyboard Navigation for Steps
+                steps.forEach(step => {
+                    step.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            const stepIndex = Array.from(steps).indexOf(step) + 1;
+                            navigateToStep(stepIndex);
+                        }
+                    });
+                });
             };
 
             const loadFavorites = () => {
@@ -1844,6 +2059,7 @@
                 initEventListeners();
                 loadFavorites();
                 displayDrawHistory();
+                updateProgressStep();
             };
 
             return { initialize };
